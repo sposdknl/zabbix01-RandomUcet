@@ -35,15 +35,15 @@ sudo mysql -e "SET GLOBAL log_bin_trust_function_creators = 1;"
 sudo mysql -e "FLUSH PRIVILEGES;"
 
 # Přidání Zabbix 7.0 LTS repository
-wget https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian12_all.deb
-sudo dpkg -i zabbix-release_latest_7.0+debian12_all.deb 
+sudo wget https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian12_all.deb
+sudo dpkg -i zabbix-release_latest_7.0+debian12_all.deb
 sudo apt update
 
 # Instalace Zabbix serveru, frontend a agenta
-apt install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent
+sudo apt install -y zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent2 zabbix-agent2-plugin-*
 # Import Zabbix databázové struktury
-sudo zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix_password zabbix 
-
+sudo zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
+# sudo zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -pzabbix_password zabbix
 # Disable log_bin_trust_function_creators option after importing database schema.
 sudo mysql -e "SET GLOBAL log_bin_trust_function_creators = 0;"
 
@@ -51,8 +51,8 @@ sudo mysql -e "SET GLOBAL log_bin_trust_function_creators = 0;"
 sudo sed -i 's/# DBPassword=/DBPassword=zabbix_password/' /etc/zabbix/zabbix_server.conf
 
 # Spuštění Zabbix serveru a agenta
-sudo systemctl restart zabbix-server zabbix-agent apache2
-sudo systemctl enable zabbix-server zabbix-agent apache2
+sudo systemctl restart zabbix-server zabbix-agent2 apache2
+sudo systemctl enable zabbix-server zabbix-agent2 apache2
 
 # Konfigurace PHP pro Zabbix frontend
 sudo sed -i 's/^max_execution_time = .*/max_execution_time = 300/' /etc/php/*/apache2/php.ini
